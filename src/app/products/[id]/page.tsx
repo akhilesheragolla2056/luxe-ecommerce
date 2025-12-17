@@ -3,8 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductActions from "./ProductActions";
 
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+// Use 'any' to bypass strict Next.js 15/16 type mismatches with params/searchParams
+export default async function ProductPage(props: any) {
+    const params = await props.params;
+    const { id } = params;
+
+    if (!id) return notFound();
 
     const product = await prisma.product.findUnique({
         where: { id: parseInt(id) },
@@ -28,6 +32,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         images = [product.images];
     }
     const mainImage = images[0];
+    const categoryName = product.category?.name || 'Collection';
 
     return (
         <div className="min-h-screen pt-28 pb-12 bg-white">
@@ -36,8 +41,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 <div className="text-sm text-gray-400 mb-8 flex items-center gap-2 uppercase tracking-tight text-xs animate-fade-in-up">
                     <Link href="/products" className="hover:text-black transition-colors">Shop</Link>
                     <span>/</span>
-                    <Link href={`/products?category=${product.category?.name || 'All'}`} className="hover:text-black transition-colors">
-                        {product.category?.name || 'Collection'}
+                    <Link href={`/products?category=${categoryName}`} className="hover:text-black transition-colors">
+                        {categoryName}
                     </Link>
                     <span>/</span>
                     <span className="text-gray-900 font-medium truncate max-w-[200px]">{product.name}</span>
@@ -47,17 +52,17 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
                     {/* Left: Premium Image Gallery */}
                     <div className="animate-fade-in-up">
-                        <div className="bg-gray-50 rounded-2xl overflow-hidden mb-6 group cursor-zoom-in">
+                        <div className="bg-gray-50 rounded-2xl overflow-hidden mb-6 group cursor-zoom-in relative aspect-[4/5]">
                             <img
                                 src={mainImage}
                                 alt={product.name}
-                                className="w-full h-auto object-contain p-8 group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                className="w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-700 ease-in-out"
                             />
                         </div>
                         <div className="grid grid-cols-4 gap-4">
                             {images.map((img, idx) => (
-                                <button key={idx} className="bg-gray-50 rounded-xl overflow-hidden hover:ring-2 ring-black transition-all">
-                                    <img src={img} alt={`View ${idx}`} className="w-full h-full object-cover" />
+                                <button key={idx} className="bg-gray-50 rounded-xl overflow-hidden aspect-square hover:ring-2 ring-black transition-all">
+                                    <img src={img} alt={`View ${idx}`} className="w-full h-full object-contain p-2" />
                                 </button>
                             ))}
                         </div>

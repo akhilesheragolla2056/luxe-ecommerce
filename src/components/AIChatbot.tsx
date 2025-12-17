@@ -1,127 +1,131 @@
 "use client";
 
-import { useState } from 'react';
-
-type Message = {
-    role: 'user' | 'bot';
-    content: string;
-};
+import { useState, useRef, useEffect } from 'react';
 
 export default function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([
-        { role: 'bot', content: 'Hi there! I am your personal shopping assistant. How can I help you today?' }
+    const [messages, setMessages] = useState<{ role: 'user' | 'ai', content: string }[]>([
+        { role: 'ai', content: 'Hi there! 👋 I\'m your Luxe assistant. Need help finding a product or tracking an order?' }
     ]);
     const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isOpen]);
 
     const handleSend = async () => {
         if (!input.trim()) return;
 
-        const userMessage = input;
-        setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        const userMsg = input;
+        setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
         setInput('');
-        setIsLoading(true);
+        setIsTyping(true);
 
-        // Simulate AI response for now (would connect to real API later)
+        // Simulate AI feeling
         setTimeout(() => {
-            let botResponse = "I can help you with that!";
-            const lowerInput = userMessage.toLowerCase();
+            let reply = "I'm focusing on finding you the best fashion items right now.";
+            const lower = userMsg.toLowerCase();
+            if (lower.includes('hello') || lower.includes('hi')) reply = "Hello! Looking for anything specific today?";
+            else if (lower.includes('price')) reply = "Our prices are competitive and include all taxes. Check the product page for the latest deals!";
+            else if (lower.includes('shipping') || lower.includes('delivery')) reply = "We offer free express delivery on orders over ₹999. Most orders arrive within 2-3 days.";
+            else if (lower.includes('return')) reply = "We have a hassle-free 30-day return policy on all unworn items.";
+            else if (lower.includes('discount') || lower.includes('offer')) reply = "Check out our Deals page for exclusive offers up to 50% off!";
 
-            if (lowerInput.includes('shoe') || lowerInput.includes('sneaker')) {
-                botResponse = "Check out our new Nebula Sneakers in the Footwear collection. They are trending right now!";
-            } else if (lowerInput.includes('return') || lowerInput.includes('refund')) {
-                botResponse = "We offer a 30-day return policy on all unworn items. You can initiate a return from your profile.";
-            } else if (lowerInput.includes('shipping')) {
-                botResponse = "Shipping is free for orders over $200. Standard shipping takes 3-5 business days.";
-            } else if (lowerInput.includes('recommend') || lowerInput.includes('suggest')) {
-                botResponse = "Based on your interest in streetwear, I'd highly recommend the Obsidian Hoodie. It's a best-seller!";
-            } else {
-                botResponse = "I'm still learning! Try asking about our products, shipping, or returns.";
-            }
-
-            setMessages(prev => [...prev, { role: 'bot', content: botResponse }]);
-            setIsLoading(false);
-        }, 1000);
+            setMessages(prev => [...prev, { role: 'ai', content: reply }]);
+            setIsTyping(false);
+        }, 1500);
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
-            {/* Chat Toggle Button */}
-            {!isOpen && (
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="w-16 h-16 bg-primary text-primary-foreground rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform animate-bounce-subtle"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                </button>
-            )}
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="w-80 sm:w-96 bg-card border border-border shadow-2xl rounded-2xl overflow-hidden flex flex-col h-[500px] animate-in slide-in-from-bottom-10 fade-in duration-300">
+                <div className="w-[350px] h-[500px] bg-white/90 backdrop-blur-xl border border-white/50 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in-up origin-bottom-right">
                     {/* Header */}
-                    <div className="bg-primary p-4 flex justify-between items-center text-primary-foreground">
-                        <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                            <h3 className="font-semibold">Luxe AI Stylist</h3>
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-sm">Luxe Bot</h3>
+                                <p className="text-xs text-white/80 flex items-center gap-1">
+                                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Online
+                                </p>
+                            </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="hover:bg-primary/80 p-1 rounded">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
+                        <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/20">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
                         {messages.map((msg, idx) => (
                             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-tr-none' : 'bg-secondary text-secondary-foreground rounded-tl-none'}`}>
+                                {msg.role === 'ai' && (
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 mr-2 flex items-center justify-center text-[10px] text-white">AI</div>
+                                )}
+                                <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user'
+                                        ? 'bg-indigo-600 text-white rounded-tr-sm'
+                                        : 'bg-white text-gray-800 border border-gray-100 rounded-tl-sm'
+                                    }`}>
                                     {msg.content}
                                 </div>
                             </div>
                         ))}
-                        {isLoading && (
+                        {isTyping && (
                             <div className="flex justify-start">
-                                <div className="bg-secondary text-secondary-foreground p-3 rounded-2xl rounded-tl-none text-sm">
-                                    <span className="flex space-x-1">
-                                        <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                                        <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                                        <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                                    </span>
+                                <div className="bg-white border border-gray-100 p-3 rounded-2xl rounded-tl-sm shadow-sm flex gap-1">
+                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
                                 </div>
                             </div>
                         )}
+                        <div ref={messagesEndRef} />
                     </div>
 
                     {/* Input */}
-                    <div className="p-4 border-t border-border bg-card">
-                        <div className="flex items-center space-x-2">
+                    <div className="p-4 bg-white border-t border-gray-100">
+                        <div className="flex gap-2">
                             <input
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                                placeholder="Ask about styles, sizing..."
-                                className="flex-1 bg-muted px-4 py-2 rounded-full text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                                placeholder="Type a message..."
+                                className="flex-1 bg-gray-100 border-0 rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
                             />
                             <button
                                 onClick={handleSend}
-                                disabled={!input.trim() || isLoading}
-                                className="p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                                className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                             </button>
+                        </div>
+                        <div className="text-[10px] text-center text-gray-400 mt-2">
+                            Powered by Luxe AI
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Toggle Button */}
+            {!isOpen && (
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-300 animate-float"
+                >
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                </button>
             )}
         </div>
     );
