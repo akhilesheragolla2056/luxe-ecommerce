@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import ProductActions from "./ProductActions"; // We might need to make a shared component or just inline a simpler version
+import ProductActions from "@/components/ProductActions"; // We might need to make a shared component or just inline a simpler version
 
 export const dynamic = 'force-dynamic';
 

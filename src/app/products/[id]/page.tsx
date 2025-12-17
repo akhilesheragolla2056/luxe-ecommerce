@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ProductActions from "./ProductActions";
+import ProductActions from "@/components/ProductActions";
 
 // Use 'any' to bypass strict Next.js 15/16 type mismatches with params/searchParams
 export default async function ProductPage(props: any) {
