@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import AIChatbot from "@/components/AIChatbot"; // Import Chatbot
+import CartSidebar from "@/components/CartSidebar";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -13,6 +15,8 @@ export const metadata: Metadata = {
   description: "Redefine your style with LUXE.",
 };
 
+import { Providers } from "./providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,8 +27,12 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} antialiased`}
       >
-        <Navbar />
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+          <AIChatbot />
+          <CartSidebar />
+        </Providers>
       </body>
     </html>
   );
